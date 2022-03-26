@@ -1,0 +1,48 @@
+{
+    "https://www.spiegel.de*": [
+        {
+            "name": "Sharing features",
+            "selector": "[data-component=FeatureBar]"
+        },
+        {
+            "name": "photo captions (also available as alt text)",
+            "selector": "figcaption"
+        },
+        {
+            "name": "Remove Web Paywall entirely",
+            "selector": "[data-area=paywall][data-target-platform=app]"
+        }
+    ],
+    "https://www.faz.net*": [
+        {
+            "name": "remove 'about the author'",
+            "selector": "[data-author-id]"
+        },
+        {
+            "name": "remove figures",
+            "selector": "figure"
+        }
+    ],
+    "https://www.welt.de*": [
+        {
+            "name": "removes external content",
+            "selector": "[data-component=oembedcomponent]"
+        },
+        {
+            "name": "removes inline article recommendations",
+            "selector": "[data-qa=InlineElement]"
+        },
+        {
+            "name": "remove second smaller images",
+            "selector": "figure > div > picture:nth-child(2)",
+        },
+        {
+            "name": "removes marquee",
+            "selector": "[data-component=Marquee]"
+        },
+        {
+            "name": "Remove Video Content",
+            "selector": "[data-qa=VideoElement]"
+        }
+    ]
+}
