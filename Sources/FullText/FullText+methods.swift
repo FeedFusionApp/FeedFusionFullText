@@ -8,6 +8,7 @@
 import Foundation
 import SwiftSoup
 import Readability
+import Logger
 
 extension FullText {
     internal static var siteRules: SiteRuleDoc {
@@ -28,38 +29,54 @@ extension FullText {
         return htmlString
     }
     
-    public static func parse(url: URL) async -> Result<FullText, FullTextError> {
+    public static func parse(url: URL, logger: Logger = .init("FeedFusion", "FullText", level: .verbose, mode: .icons)) async -> Result<FullText, FullTextError> {
+        let tag = UUID().uuidString
+        
+        logger.info("parsing article '\(url.absoluteString)'", tag: tag)
+        
         var html: String?
         do {
+            logger.debug("download - attempting", tag: tag)
             html = try await downloadHTML(from: url)
+            logger.debug("download - success", tag: tag)
         } catch {
+            logger.error("download - failure: \(error)", tag: tag)
             return .failure(.downloadError(error))
         }
         
         guard let html = html else {
+            logger.error("download - html was empty", tag: tag)
             return .failure(.downloadError)
         }
         
-        
         var article: Article?
         do {
+            logger.debug("parser - attempting", tag: tag)
             article = try Readability.shared.parseArticle(html: html).get()
+            logger.debug("parser - success", tag: tag)
         } catch let error as ReadabilityError {
+            logger.error("parser - failure: \(error)", tag: tag)
             return .failure(.readabilityError(error))
         } catch {
+            logger.error("parser - failure: \(error)", tag: tag)
             return .failure(.readabilityError(.unknown(error)))
         }
         
         guard let processedHTML = article?.content else {
+            logger.error("parser - html was empty", tag: tag)
             return .failure(.contentEmpty)
         }
         
         do {
+            logger.debug("postprocessing - parsing document", tag: tag)
             var document = try SwiftSoup.parseBodyFragment(processedHTML)
             
             var elements = [FullText.Elements]()
             
-            applySiteRules(&document, url: url)
+            logger.debug("postprocessing - applying site-ruls", tag: tag)
+            applySiteRules(&document, url: url, logger: logger, tag: tag)
+            
+            logger.debug("postprocessing - flattening document", tag: tag)
             for element in document.flatten() {
                 switch element {
                     case .heading(let text), .paragraph(let text):
@@ -91,8 +108,10 @@ extension FullText {
                                            elements: elements,
                                            readabilityHTML: try? document.html())
             
+            logger.info("success", tag: tag)
             return .success(fullText)
         } catch {
+            logger.error("failure: \(error)", tag: tag)
             return .failure(.swiftSoup(error))
         }
     }

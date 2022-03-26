@@ -18,6 +18,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/scinfu/SwiftSoup", .exact("2.3.8")),
+        .package(name: "Logger", url: "https://github.com/FeedFusionApp/FeedFusionLogging.git", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -25,7 +26,7 @@ let package = Package(
         
         .target(
             name: "FullText",
-            dependencies: ["Readability", "SwiftSoup"],
+            dependencies: ["Readability", "SwiftSoup", "Logger"],
             resources: [.process("Resources")]),
         .testTarget(
             name: "FullTextTests",
